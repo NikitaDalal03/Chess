@@ -5,33 +5,39 @@ using Yudiz.StarterKit.UI;
 
 public class Chessman : MonoBehaviour
 {
-        //References to objects in our Unity Scene
-        public GameObject controller;
-        public GameObject movePlate;
+    public GameObject controller;
 
-        //Position for this Chesspiece on the Board
-        //The correct position will be set later
-        private int xBoard = -1;
-        private int yBoard = -1;
+    public GameObject movePlate;
 
-        //Variable for keeping track of the player it belongs to "black" or "white"
-        private string player;
+    //Position for this Chesspiece on the Board
+    private int xBoard = -1;
+    private int yBoard = -1;
 
-        //References to all the possible Sprites that this Chesspiece could be
-        public Sprite black_queen, black_knight, black_bishop, black_king, black_rook, black_pawn;
-        public Sprite white_queen, white_knight, white_bishop, white_king, white_rook, white_pawn;
+    //Variable for keeping track of the player it belongs to "black" or "white"    
+    private string player;    
 
-        public void Activate()
-        {
-            //Get the game controller
-            controller = GameObject.FindGameObjectWithTag("GameController");
+    //References to all the possible Sprites that this Chesspiece could be    
+    public Sprite black_queen, black_knight, black_bishop, black_king, black_rook, black_pawn;   
+    public Sprite white_queen, white_knight, white_bishop, white_king, white_rook, white_pawn;
 
-            //Take the instantiated location and adjust transform
-            SetCoords();
 
-            //Choose correct sprite based on piece's name
-            switch (this.name)
-            {
+    public void Start()
+    {
+        //SpriteRenderer spriteRenderer = this.GetComponent<SpriteRenderer>();
+        //game = GetComponent<Game>();
+        //movePlate = GetComponent<MovePlate>();
+    }
+
+    public void Activate()
+    {    
+        controller = GameObject.FindGameObjectWithTag("GameController");
+
+        //Take the instantiated location and adjust transform
+        SetCoords();
+
+        //Choose correct sprite based on piece's name
+         switch (this.name)
+         {
                 case "black_queen": this.GetComponent<SpriteRenderer>().sprite = black_queen; player = "black"; break;
                 case "black_knight": this.GetComponent<SpriteRenderer>().sprite = black_knight; player = "black"; break;
                 case "black_bishop": this.GetComponent<SpriteRenderer>().sprite = black_bishop; player = "black"; break;
@@ -44,128 +50,132 @@ public class Chessman : MonoBehaviour
                 case "white_king": this.GetComponent<SpriteRenderer>().sprite = white_king; player = "white"; break;
                 case "white_rook": this.GetComponent<SpriteRenderer>().sprite = white_rook; player = "white"; break;
                 case "white_pawn": this.GetComponent<SpriteRenderer>().sprite = white_pawn; player = "white"; break;
-            }
-        }
+         }
+    }
 
-        public void SetCoords()
+    public void SetCoords()
+    {    
+          //Get the board value in order to convert to xy coords
+          float x = xBoard;
+          float y = yBoard;
+
+          //Adjust by variable offset
+          x *= 0.66f;
+          y *= 0.66f;
+
+          //Add constants (pos 0,0)
+          x += -2.3f;
+          y += -2.3f;
+
+          //Set actual unity values
+          this.transform.position = new Vector3(x, y, -1.0f);
+    }
+
+    public int GetXBoard()
+    {
+        return xBoard;
+    }
+
+    public int GetYBoard()
+    {
+        return yBoard;
+    }
+
+    public void SetXBoard(int x)
+    {
+        xBoard = x;
+    }
+
+    public void SetYBoard(int y)
+    {
+        yBoard = y;
+    }
+
+    private void OnMouseUp()   
+    {    
+        if (!controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == player)     
         {
-            //Get the board value in order to convert to xy coords
-            float x = xBoard;
-            float y = yBoard;
+            //Remove all moveplates relating to previously selected piece
+            DestroyMovePlates();    
 
-            //Adjust by variable offset
-            x *= 0.66f;
-            y *= 0.66f;
-
-            //Add constants (pos 0,0)
-            x += -2.3f;
-            y += -2.3f;
-
-            //Set actual unity values
-            this.transform.position = new Vector3(x, y, -1.0f);
+            //Create new MovePlates
+            InitiateMovePlates();
         }
+    }
 
-        public int GetXBoard()
+    public void DestroyMovePlates()
+    {
+        //Destroy old MovePlates
+        GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
+        for (int i = 0; i < movePlates.Length; i++)
         {
-            return xBoard;
+            Destroy(movePlates[i]); //Be careful with this function "Destroy" it is asynchronous
         }
+    }
 
-        public int GetYBoard()
+    public void InitiateMovePlates()
+    {
+        switch (this.name)
         {
-            return yBoard;
+             case "black_queen":
+             case "white_queen":
+                 LineMovePlate(1, 0);
+                 LineMovePlate(0, 1);
+                 LineMovePlate(1, 1);
+                 LineMovePlate(-1, 0);
+                 LineMovePlate(0, -1);
+                 LineMovePlate(-1, -1);
+                 LineMovePlate(-1, 1);
+                 LineMovePlate(1, -1);
+                 break;
+              case "black_knight":  
+              case "white_knight":  
+                  LMovePlate();
+                  break;      
+              case "black_bishop":  
+              case "white_bishop":  
+                  LineMovePlate(1, 1);  
+                  LineMovePlate(1, -1);  
+                  LineMovePlate(-1, 1);  
+                  LineMovePlate(-1, -1);  
+                  break;  
+              case "black_king":  
+              case "white_king":
+                  SurroundMovePlate();  
+                  break;
+              case "black_rook":  
+              case "white_rook":  
+                  LineMovePlate(1, 0);  
+                  LineMovePlate(0, 1);  
+                  LineMovePlate(-1, 0);
+                  LineMovePlate(0, -1);   
+                  break;
+              case "black_pawn":
+                  PawnMovePlate(xBoard, yBoard - 1);
+                  if(yBoard == 6)
+                  PawnMovePlate(xBoard, yBoard - 2);
+                  break;
+              case "white_pawn":
+                  PawnMovePlate(xBoard, yBoard + 1);
+                  if(yBoard == 1)
+                  PawnMovePlate(xBoard, yBoard + 2);
+                  break;
         }
+    }
 
-        public void SetXBoard(int x)
+    public void LineMovePlate(int xIncrement, int yIncrement)
+    {
+        Game sc = controller.GetComponent<Game>();
+
+        int x = xBoard + xIncrement;
+        int y = yBoard + yIncrement;
+
+        while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
         {
-            xBoard = x;
-        }
-
-        public void SetYBoard(int y)
-        {
-            yBoard = y;
-        }
-
-        private void OnMouseUp()
-        {
-            if (!controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == player)
-            {
-                //Remove all moveplates relating to previously selected piece
-                DestroyMovePlates();
-
-                //Create new MovePlates
-                InitiateMovePlates();
-            }
-        }
-
-        public void DestroyMovePlates()
-        {
-            //Destroy old MovePlates
-            GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
-            for (int i = 0; i < movePlates.Length; i++)
-            {
-                Destroy(movePlates[i]); //Be careful with this function "Destroy" it is asynchronous
-            }
-        }
-
-        public void InitiateMovePlates()
-        {
-            switch (this.name)
-            {
-                case "black_queen":
-                case "white_queen":
-                    LineMovePlate(1, 0);
-                    LineMovePlate(0, 1);
-                    LineMovePlate(1, 1);
-                    LineMovePlate(-1, 0);
-                    LineMovePlate(0, -1);
-                    LineMovePlate(-1, -1);
-                    LineMovePlate(-1, 1);
-                    LineMovePlate(1, -1);
-                    break;
-                case "black_knight":
-                case "white_knight":
-                    LMovePlate();
-                    break;
-                case "black_bishop":
-                case "white_bishop":
-                    LineMovePlate(1, 1);
-                    LineMovePlate(1, -1);
-                    LineMovePlate(-1, 1);
-                    LineMovePlate(-1, -1);
-                    break;
-                case "black_king":
-                case "white_king":
-                    SurroundMovePlate();
-                    break;
-                case "black_rook":
-                case "white_rook":
-                    LineMovePlate(1, 0);
-                    LineMovePlate(0, 1);
-                    LineMovePlate(-1, 0);
-                    LineMovePlate(0, -1);
-                    break;
-                case "black_pawn":
-                    PawnMovePlate(xBoard, yBoard - 1);
-                    break;
-                case "white_pawn":
-                    PawnMovePlate(xBoard, yBoard + 1);
-                    break;
-            }
-        }
-
-        public void LineMovePlate(int xIncrement, int yIncrement)
-        {
-            Game sc = controller.GetComponent<Game>();
-
-            int x = xBoard + xIncrement;
-            int y = yBoard + yIncrement;
-
-            while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
-            {
-                MovePlateSpawn(x, y);
+           MovePlateSpawn(x, y);
                 x += xIncrement;
                 y += yIncrement;
-            }
+        }
 
             if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chessman>().player != player)
             {

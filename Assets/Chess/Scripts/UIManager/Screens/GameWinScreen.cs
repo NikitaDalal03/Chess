@@ -30,7 +30,9 @@ namespace Yudiz.StarterKit.UI
             }
 
             // Add listeners for the buttons
+            Debug.Log("OnClick event of play again");
             playAgainBtn.onClick.AddListener(OnPlayAgain);
+            Debug.Log("OnClick event of home");
             homeButton.onClick.AddListener(OnHomee);
         }
 
@@ -41,6 +43,7 @@ namespace Yudiz.StarterKit.UI
 
         public void OnHomee()
         {
+            Debug.Log("Pressed home button");
             UIManager.Instance.ShowScreen(ScreenName.StartScreen);
         }
 
