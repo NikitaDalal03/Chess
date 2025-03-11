@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -49,7 +50,6 @@ public class Game : MonoBehaviour
             Create("black_pawn", 0, 6), Create("black_pawn", 1, 6), Create("black_pawn", 2, 6),
             Create("black_pawn", 3, 6), Create("black_pawn", 4, 6), Create("black_pawn", 5, 6),
             Create("black_pawn", 6, 6), Create("black_pawn", 7, 6) };
-
     }
 
     public GameObject Create(string name, int x, int y)
@@ -101,13 +101,14 @@ public class Game : MonoBehaviour
         if (currentPlayer == "white")
         {
             currentPlayer = "black";
-            Timer.instance.StartTimer();
-            
+            Timer.instance.StartblackTimer();
+
         }
         else
         {
             currentPlayer = "white";
-            Timer.instance.StartTimer();
+            Timer.instance.StartWhiteTimer();
+            
         }
     }
 
@@ -174,6 +175,9 @@ public class Game : MonoBehaviour
         //Reset turn to white and game over flag
         currentPlayer = "white";
         gameOver = false;
+
+        Timer.instance.ResetWhiteTimer();
+        Timer.instance.ResetBlackTimer();
     }
 }
 

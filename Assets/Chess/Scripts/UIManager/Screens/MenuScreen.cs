@@ -26,7 +26,7 @@ namespace Yudiz.StarterKit.UI
 
         public void OnPlayTogether()
         {
-            UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
+            UIManager.Instance.ShowScreen(ScreenName.NameScreen);
         }
 
         public void OnBack()

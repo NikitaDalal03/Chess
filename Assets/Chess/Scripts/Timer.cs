@@ -1,43 +1,63 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Yudiz.StarterKit.UI;
 using TMPro;
 
 public class Timer : MonoBehaviour
 {
-    public TMP_Text timerText;
-    private float countdown = 10f;
-    private bool timerRunning = true;
-    public static Timer instance;
+    [SerializeField] TMP_Text whiteTimerText;
+    [SerializeField] TMP_Text blackTimerText;
+    [SerializeField] TextMeshProUGUI player1NameText;
+    [SerializeField] TextMeshProUGUI player2NameText;
+    [SerializeField] GameObject game;
 
+    private float whiteCountdown = 120f; 
+    private float blackCountdown = 120f;
+
+    private bool whiteTimerRunning = false; 
+    private bool blackTimerRunning = false;
+    private bool isWhiteTurn = true;
+
+    public static Timer instance;
 
     private void Start()
     {
+        game = GameObject.FindGameObjectWithTag("GameController");
         instance = this;
     }
 
-
     void Update()
     {
-        if (timerRunning)
+        // Update timer based on whose turn it is
+        if (isWhiteTurn && whiteTimerRunning)
         {
-            countdown -= Time.deltaTime;
-            DisplayTime(countdown);
+            whiteCountdown -= Time.deltaTime;
+            DisplayTime(whiteCountdown, whiteTimerText);
 
-            if (countdown <= 0f)
+            if (whiteCountdown <= 0f)
             {
-                timerRunning = false;
-                countdown = 0f;
+                whiteTimerRunning = false;
+                whiteCountdown = 0f;
+                game.GetComponent<Game>().NextTurn();
+            }
+        }
+        else if (!isWhiteTurn && blackTimerRunning)
+        {
+            blackCountdown -= Time.deltaTime;
+            DisplayTime(blackCountdown, blackTimerText);
 
-                //UiManager.instance.SwitchScreen(GameScreens.GameOver);
-                //SoundManager.inst.PlaySound(SoundName.GameOver);
-
+            if (blackCountdown <= 0f)
+            {
+                blackTimerRunning = false;
+                blackCountdown = 0f;
+                Debug.Log("WhiteTurn");
+                game.GetComponent<Game>().NextTurn();
             }
         }
     }
 
-    void DisplayTime(float timeToDisplay)
+    void DisplayTime(float timeToDisplay, TMP_Text timerUI)
     {
         if (timeToDisplay < 0)
         {
@@ -47,23 +67,49 @@ public class Timer : MonoBehaviour
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);
         float seconds = Mathf.FloorToInt(timeToDisplay % 60);
 
-        timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        timerUI.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    public void ResetTimer()
+    public void StartWhiteTimer()
     {
-        countdown = 280f;
-        timerRunning = true;
+        player1NameText.text = NameScreen.player1Name;
+        ResetBlackTimer();
+        isWhiteTurn = true;
+        whiteTimerText.enabled = true;
+        blackTimerText.enabled = false;
+        whiteTimerRunning = true;
+        blackTimerRunning = false;
+        player1NameText.enabled = true;
+        player2NameText.enabled = false;
     }
 
-    public void StopTimer()
+    public void StartblackTimer()
     {
-        timerRunning = false;
+        player2NameText.text = NameScreen.player2Name;
+        ResetWhiteTimer();
+        isWhiteTurn = false;
+        blackTimerText.enabled = true;
+        whiteTimerText.enabled = false;
+        blackTimerRunning = true;
+        whiteTimerRunning = false;
+        player2NameText.enabled = true;
+        player1NameText.enabled = false;
     }
 
-    public void StartTimer()
+    public void ResetWhiteTimer()
     {
-        timerRunning = true;
+        whiteCountdown = 120f;
+        whiteTimerRunning = false;
+        whiteTimerText.enabled = false;
+        player1NameText.enabled = false;
     }
+
+    public void ResetBlackTimer()
+    {
+        blackCountdown = 120f;
+        blackTimerRunning = false;
+        blackTimerText.enabled = false;
+        player2NameText.enabled = false;
+    }
+
 }
-

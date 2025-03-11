@@ -203,6 +203,7 @@ namespace Yudiz.StarterKit.UI
 		GameWinScreen,
 		OpponentSelectionScreen,
 		MenuScreen,
+		NameScreen,
 		//LevelUpScreen,
 		//SettingsScreen,
 		//InGameSettingsScreen,
