@@ -6,7 +6,6 @@ using Yudiz.StarterKit.UI;
 
 public class MovePlate : MonoBehaviour
 {
-
     // Some functions will need reference to the controller
     public GameObject controller;
 
@@ -15,8 +14,8 @@ public class MovePlate : MonoBehaviour
     Chessman referenceChessman = null;    
 
     // Location on the board
-    int matrixX;        
-    int matrixY;    
+    public int matrixX;        
+    public int matrixY;    
 
     // false: movement, true: attacking
     public bool attack = false;    
@@ -30,7 +29,7 @@ public class MovePlate : MonoBehaviour
 
         if (attack)
         {
-                // Set to red
+            // Set to red
             gameObject.GetComponent<SpriteRenderer>().color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         }
     }
@@ -55,25 +54,23 @@ public class MovePlate : MonoBehaviour
             {
                 Debug.LogWarning("No piece at the target position!");
             }
-
         }
 
-            // Set the Chesspiece's original location to be empty
-        controller.GetComponent<Game>().SetPositionEmpty(referenceChessman.GetXBoard(),
-                referenceChessman.GetYBoard());    
+        // Set the Chesspiece's original location to be empty
+        controller.GetComponent<Game>().SetPositionEmpty(referenceChessman.GetXBoard(), referenceChessman.GetYBoard());    
 
-            // Move reference chess piece to this position
+        // Move reference chess piece to this position
         referenceChessman.SetXBoard(matrixX);   
         referenceChessman.SetYBoard(matrixY);
         referenceChessman.SetCoords();
 
-            // Update the matrix with the new piece position
+        // Update the matrix with the new piece position
         controller.GetComponent<Game>().SetPosition(reference);
 
-            // Switch Current Player
+        // Switch Current Player
         controller.GetComponent<Game>().NextTurn();
 
-            // Destroy the move plates including self
+        // Destroy the move plates including self
         referenceChessman.DestroyMovePlates();
     }
 

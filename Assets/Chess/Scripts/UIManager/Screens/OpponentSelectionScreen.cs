@@ -12,8 +12,14 @@ namespace Yudiz.StarterKit.UI
         [SerializeField] Button low;
         [SerializeField] Button backBtn;
 
+        public GameObject controller;
+        private Game game;
+
         public override void Show()
         {
+            game = controller.GetComponent<Game>();
+            controller = GameObject.FindGameObjectWithTag("GameController");
+
             base.Show();
             high.onClick.AddListener(OnHigh);
             medium.onClick.AddListener(OnMedium);
@@ -23,16 +29,19 @@ namespace Yudiz.StarterKit.UI
 
         public void OnHigh()
         {
+            game.SelectAI(3);
             UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
         }
 
         public void OnMedium()
         {
+            game.SelectAI(2);
             UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
         }
 
         public void OnLow()
         {
+            game.SelectAI(1);
             UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
         }
 

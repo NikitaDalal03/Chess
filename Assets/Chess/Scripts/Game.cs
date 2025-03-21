@@ -2,19 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Yudiz.StarterKit.UI;
 
-
 public class Game : MonoBehaviour
 {
-    public GameObject chesspiece;
+    [SerializeField] GameObject chesspiece;
+    private IChessAI selectedAI;
 
     //same objects are going to be in "positions" and "playerBlack"/"playerWhite"
     private GameObject[,] positions = new GameObject[8, 8];
-    private GameObject[] playerBlack = new GameObject[16];
-    private GameObject[] playerWhite = new GameObject[16];
+    public GameObject[] playerBlack = new GameObject[16];
+    public GameObject[] playerWhite = new GameObject[16];
 
     //current turn
     private string currentPlayer = "white";
@@ -28,12 +27,40 @@ public class Game : MonoBehaviour
     {
         chessPiecePosition();
 
-        //Set all piece positions on the positions board
-         for (int i = 0; i < playerBlack.Length; i++)
-         {
-             SetPosition(playerBlack[i]);
-             SetPosition(playerWhite[i]);
-         }   
+        // Set all piece positions on the positions board
+        for (int i = 0; i < playerBlack.Length; i++)
+        {
+            SetPosition(playerBlack[i]);
+            SetPosition(playerWhite[i]);
+        }
+    }
+
+    public void SelectAI(int aiLevel)
+    {
+        switch (aiLevel)
+        {
+            case 1:
+                selectedAI = new RandomAI();
+                break;
+            case 2:
+                selectedAI = new DefensiveAI();
+                break;
+            case 3:
+                selectedAI = new StrategicAI();
+                break;
+        }
+    }
+
+    public GameObject[] GetOpponentPieces(string currentPlayer)
+    {
+        if (currentPlayer == "white")
+        {
+            return playerBlack; // Opponent's pieces are the black ones if it's white's turn
+        }
+        else
+        {
+            return playerWhite; // Opponent's pieces are the white ones if it's black's turn
+        }
     }
 
     public void chessPiecePosition()
@@ -55,18 +82,17 @@ public class Game : MonoBehaviour
     public GameObject Create(string name, int x, int y)
     {
         GameObject obj = Instantiate(chesspiece, new Vector3(0, 0, -1), Quaternion.identity);
-        Chessman cm = obj.GetComponent<Chessman>();  
-        cm.name = name; 
-        cm.SetXBoard(x);    
-        cm.SetYBoard(y);    
-        cm.Activate();         
-        return obj;    
+        Chessman cm = obj.GetComponent<Chessman>();
+        cm.name = name;
+        cm.SetXBoard(x);
+        cm.SetYBoard(y);
+        cm.Activate();
+        return obj;
     }
 
     public void SetPosition(GameObject obj)
     {
         Chessman cm = obj.GetComponent<Chessman>();
-
         positions[cm.GetXBoard(), cm.GetYBoard()] = obj;
     }
 
@@ -85,15 +111,42 @@ public class Game : MonoBehaviour
         if (x < 0 || y < 0 || x >= positions.GetLength(0) || y >= positions.GetLength(1)) return false;
         return true;
     }
-  
+
     public string GetCurrentPlayer()
     {
         return currentPlayer;
     }
-      
+
     public bool IsGameOver()
     {
         return gameOver;
+    }
+
+    public void Update()
+    {
+        if (gameOver && Input.GetMouseButtonDown(0))
+        {
+            gameOver = false;
+            ResetGame();
+        }
+
+
+        if (currentPlayer == "black" && selectedAI != null && !isAITurn)
+        {
+            StartCoroutine(HandleAITurnDelay(5f));  
+        }
+    }
+
+    private bool isAITurn = false;
+
+
+    private IEnumerator HandleAITurnDelay(float delay)
+    {
+        isAITurn = true;
+        yield return new WaitForSeconds(delay); 
+        selectedAI.MakeMove(this);  
+        //NextTurn(); 
+        isAITurn = false;
     }
 
     public void NextTurn()
@@ -101,29 +154,19 @@ public class Game : MonoBehaviour
         if (currentPlayer == "white")
         {
             currentPlayer = "black";
-            Timer.instance.StartblackTimer();
-
+            Timer.instance.StartBlackTimer();  
         }
         else
         {
             currentPlayer = "white";
-            Timer.instance.StartWhiteTimer();
-            
+            Timer.instance.StartWhiteTimer();  
         }
     }
 
-    public void Update()
-    {
-        if (gameOver == true && Input.GetMouseButtonDown(0))
-        {
-             gameOver = false;
-             ResetGame();
-        }       
-    }            
 
     public void Winner(string playerWinner)
     {
-        winner = playerWinner;  
+        winner = playerWinner;
         gameOver = true;
         Debug.Log(playerWinner + " wins!");
 
@@ -137,7 +180,6 @@ public class Game : MonoBehaviour
 
     public void ResetGame()
     {
-        //clear out the current chess pieces from the positions board
         for (int x = 0; x < 8; x++)
         {
             for (int y = 0; y < 8; y++)
@@ -146,7 +188,6 @@ public class Game : MonoBehaviour
             }
         }
 
-        //Destroy all existing pieces
         foreach (GameObject piece in playerBlack)
         {
             Destroy(piece);
@@ -164,7 +205,6 @@ public class Game : MonoBehaviour
         //Reinitialize player pieces to their starting positions
         chessPiecePosition();
 
-
         //Set positions for the newly instantiated pieces
         for (int i = 0; i < playerBlack.Length; i++)
         {
@@ -180,4 +220,3 @@ public class Game : MonoBehaviour
         Timer.instance.ResetBlackTimer();
     }
 }
-

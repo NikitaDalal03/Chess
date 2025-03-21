@@ -83,7 +83,7 @@ public class Timer : MonoBehaviour
         player2NameText.enabled = false;
     }
 
-    public void StartblackTimer()
+    public void StartBlackTimer()
     {
         player2NameText.text = NameScreen.player2Name;
         ResetWhiteTimer();
@@ -111,5 +111,4 @@ public class Timer : MonoBehaviour
         blackTimerText.enabled = false;
         player2NameText.enabled = false;
     }
-
 }

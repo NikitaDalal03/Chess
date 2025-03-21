@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1267904602886809752}
   m_Layer: 0
   m_Name: Chesspiece
-  m_TagString: Untagged
+  m_TagString: ChessPiece
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -99,6 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  type: 
   movePlate: {fileID: 8177014869940044210, guid: 9a47b5b3cc0664f7996b10c1fbff3761, type: 3}
   black_queen: {fileID: 21300000, guid: 0274f36f47b2441968adda661bc32b22, type: 3}
   black_knight: {fileID: 21300000, guid: 0e669db74e6254d65af4c784d3445958, type: 3}

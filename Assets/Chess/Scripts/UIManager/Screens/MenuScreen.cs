@@ -21,6 +21,7 @@ namespace Yudiz.StarterKit.UI
 
         public void OnPlayWithAI()
         {
+            //game.SelectMultiplayer();
             UIManager.Instance.ShowScreen(ScreenName.OpponentSelectionScreen);
         }
 

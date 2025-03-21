@@ -15,7 +15,6 @@ namespace Yudiz.StarterKit.UI
         public override void Hide()
         {
             base.Hide();
-
         }
     }
 }

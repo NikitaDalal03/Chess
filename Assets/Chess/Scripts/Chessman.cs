@@ -6,6 +6,9 @@ using Yudiz.StarterKit.UI;
 public class Chessman : MonoBehaviour
 {
     public GameObject controller;
+    private Game game;
+
+    public string type;
 
     public GameObject movePlate;
 
@@ -26,11 +29,11 @@ public class Chessman : MonoBehaviour
         //SpriteRenderer spriteRenderer = this.GetComponent<SpriteRenderer>();
         //game = GetComponent<Game>();
         //movePlate = GetComponent<MovePlate>();
+        game = controller.GetComponent<Game>();
     }
 
     public void Activate()
-    {
-        
+    {        
         controller = GameObject.FindGameObjectWithTag("GameController");
 
         //Take the instantiated location and adjust transform
@@ -56,19 +59,19 @@ public class Chessman : MonoBehaviour
 
     public void SetCoords()
     {    
-          //Get the board value in order to convert to xy coords
+         //Get the board value in order to convert to xy coords
          float x = xBoard;
          float y = yBoard;
 
-          //Adjust by variable offset
+         //Adjust by variable offset
          x *= 0.66f;
          y *= 0.66f;
 
-          //Add constants (pos 0,0)
+         //Add constants (pos 0,0)
          x += -2.3f;
          y += -2.3f;
 
-          //Set actual unity values
+         //Set actual unity values
          this.transform.position = new Vector3(x, y, -1.0f);
     }
 
@@ -94,7 +97,7 @@ public class Chessman : MonoBehaviour
 
     private void OnMouseUp()   
     {    
-        if (!controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == player)     
+        if (!game.IsGameOver() && game.GetCurrentPlayer() == player)     
         {
             //Remove all moveplates relating to previously selected piece
             DestroyMovePlates();    
@@ -118,8 +121,8 @@ public class Chessman : MonoBehaviour
     {
         switch (this.name)
         {
-             case "black_queen":
-             case "white_queen":
+            case "black_queen":
+            case "white_queen":
                  LineMovePlate(1, 0);
                  LineMovePlate(0, 1);
                  LineMovePlate(1, 1);
@@ -129,106 +132,121 @@ public class Chessman : MonoBehaviour
                  LineMovePlate(-1, 1);
                  LineMovePlate(1, -1);
                  break;
-              case "black_knight":  
-              case "white_knight":  
+            case "black_knight":  
+            case "white_knight":  
                   LMovePlate();
                   break;      
-              case "black_bishop":  
-              case "white_bishop":  
+            case "black_bishop":  
+            case "white_bishop":  
                   LineMovePlate(1, 1);  
                   LineMovePlate(1, -1);  
                   LineMovePlate(-1, 1);  
                   LineMovePlate(-1, -1);  
                   break;  
-              case "black_king":  
-              case "white_king":
+            case "black_king":  
+            case "white_king":
                   SurroundMovePlate();  
                   break;
-              case "black_rook":  
-              case "white_rook":  
+            case "black_rook":  
+            case "white_rook":  
                   LineMovePlate(1, 0);  
                   LineMovePlate(0, 1);  
                   LineMovePlate(-1, 0);
                   LineMovePlate(0, -1);   
                   break;
-              case "black_pawn":
-                  PawnMovePlate(xBoard, yBoard - 1);
-                  if(yBoard == 6)
-                  PawnMovePlate(xBoard, yBoard - 2);
-                  break;
-              case "white_pawn":
-                  PawnMovePlate(xBoard, yBoard + 1);
-                  if(yBoard == 1)
-                  PawnMovePlate(xBoard, yBoard + 2);
-                  break;
+            case "black_pawn":
+                PawnMovePlate(xBoard, yBoard - 1);
+                if (yBoard == 6)
+                {
+                    //if both the first square (yBoard - 1) and the second square (yBoard - 2) are empty
+                    if (game.GetPosition(xBoard, yBoard - 1) == null &&
+                        game.GetPosition(xBoard, yBoard - 2) == null)
+                    {
+                        PawnMovePlate(xBoard, yBoard - 2);
+                    }
+                }
+                break;
+
+            case "white_pawn":
+                PawnMovePlate(xBoard, yBoard + 1);
+                if (yBoard == 1)
+                {
+                    //if both the first square (yBoard + 1) and the second square (yBoard + 2) are empty
+                    if (game.GetPosition(xBoard, yBoard + 1) == null &&
+                        game.GetPosition(xBoard, yBoard + 2) == null)
+                    {
+                        PawnMovePlate(xBoard, yBoard + 2);
+                    }
+                }
+                break;
         }
     }
 
     public void LineMovePlate(int xIncrement, int yIncrement)
     {
-        Game sc = controller.GetComponent<Game>();
+        Game sc = game;
 
         int x = xBoard + xIncrement;
         int y = yBoard + yIncrement;
 
         while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
         {
-           MovePlateSpawn(x, y);
-                x += xIncrement;
-                y += yIncrement;
+            MovePlateSpawn(x, y);
+            x += xIncrement;
+            y += yIncrement;
         }
 
-            if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chessman>().player != player)
+        if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chessman>().player != player)
+        {
+            MovePlateAttackSpawn(x, y);
+        }
+    }
+
+    public void LMovePlate()
+    {
+        PointMovePlate(xBoard + 1, yBoard + 2);    
+        PointMovePlate(xBoard - 1, yBoard + 2);    
+        PointMovePlate(xBoard + 2, yBoard + 1);    
+        PointMovePlate(xBoard + 2, yBoard - 1);    
+        PointMovePlate(xBoard + 1, yBoard - 2);    
+        PointMovePlate(xBoard - 1, yBoard - 2);    
+        PointMovePlate(xBoard - 2, yBoard + 1);    
+        PointMovePlate(xBoard - 2, yBoard - 1);    
+    }
+
+    public void SurroundMovePlate()
+    {
+        PointMovePlate(xBoard, yBoard + 1);    
+        PointMovePlate(xBoard, yBoard - 1);    
+        PointMovePlate(xBoard - 1, yBoard + 0);    
+        PointMovePlate(xBoard - 1, yBoard - 1);    
+        PointMovePlate(xBoard - 1, yBoard + 1);    
+        PointMovePlate(xBoard + 1, yBoard + 0);    
+        PointMovePlate(xBoard + 1, yBoard - 1);    
+        PointMovePlate(xBoard + 1, yBoard + 1);    
+    }
+
+    public void PointMovePlate(int x, int y)    
+    {
+        Game sc = game;
+        if (sc.PositionOnBoard(x, y))
+        {
+            GameObject cp = sc.GetPosition(x, y);
+
+            if (cp == null)
+            {
+                MovePlateSpawn(x, y);
+            }
+            else if (cp.GetComponent<Chessman>().player != player)
             {
                 MovePlateAttackSpawn(x, y);
             }
         }
-
-        public void LMovePlate()
-        {
-            PointMovePlate(xBoard + 1, yBoard + 2);
-            PointMovePlate(xBoard - 1, yBoard + 2);
-            PointMovePlate(xBoard + 2, yBoard + 1);
-            PointMovePlate(xBoard + 2, yBoard - 1);
-            PointMovePlate(xBoard + 1, yBoard - 2);
-            PointMovePlate(xBoard - 1, yBoard - 2);
-            PointMovePlate(xBoard - 2, yBoard + 1);
-            PointMovePlate(xBoard - 2, yBoard - 1);
-        }
-
-        public void SurroundMovePlate()
-        {
-            PointMovePlate(xBoard, yBoard + 1);
-            PointMovePlate(xBoard, yBoard - 1);
-            PointMovePlate(xBoard - 1, yBoard + 0);
-            PointMovePlate(xBoard - 1, yBoard - 1);
-            PointMovePlate(xBoard - 1, yBoard + 1);
-            PointMovePlate(xBoard + 1, yBoard + 0);
-            PointMovePlate(xBoard + 1, yBoard - 1);
-            PointMovePlate(xBoard + 1, yBoard + 1);
-        }
-
-        public void PointMovePlate(int x, int y)
-        {
-            Game sc = controller.GetComponent<Game>();
-            if (sc.PositionOnBoard(x, y))
-            {
-                GameObject cp = sc.GetPosition(x, y);
-
-                if (cp == null)
-                {
-                    MovePlateSpawn(x, y);
-                }
-                else if (cp.GetComponent<Chessman>().player != player)
-                {
-                    MovePlateAttackSpawn(x, y);
-                }
-            }
-        }
+    }
 
         public void PawnMovePlate(int x, int y)
         {
-            Game sc = controller.GetComponent<Game>();
+            Game sc = game;
             if (sc.PositionOnBoard(x, y))
             {
                 if (sc.GetPosition(x, y) == null)
@@ -292,5 +310,45 @@ public class Chessman : MonoBehaviour
             mpScript.SetReference(gameObject);
             mpScript.SetCoords(matrixX, matrixY);
         }
+
+
+    public bool CanAttackPosition(Vector3 targetPosition)
+    {
+        // Depending on the type of piece, you will need different logic
+        // Here is a simplified check for a few piece types as an example
+
+        // Calculate the difference in x and y positions
+        int dx = Mathf.Abs(xBoard - (int)targetPosition.x);
+        int dy = Mathf.Abs(yBoard - (int)targetPosition.y);
+
+        //For example, let's assume that the piece is a rook:
+        if (type == "rook")
+        {
+            return dx == 0 || dy == 0; //Rooks can move any number of squares horizontally or vertically
+        }
+        //For a bishop:
+        else if (type == "bishop")
+        {
+            return dx == dy; //Bishops can move diagonally
+        }
+        //For a queen:
+        else if (type == "queen")
+        {
+            return dx == dy || dx == 0 || dy == 0; //Queen can move like both a rook and a bishop
+        }
+        //For a knight:
+        else if (type == "knight")
+        {
+            return (dx == 1 && dy == 2) || (dx == 2 && dy == 1); // Knights move in an L-shape
+        }
+        // For a king:
+        else if (type == "king")
+        {
+            return dx <= 1 && dy <= 1; // King can move one square in any direction
+        }
+        // Add additional cases for other piece types...
+
+        return false;
+    }
 }
 
