@@ -9,97 +9,123 @@ public class DefensiveAI : IChessAI
         string currentPlayer = game.GetCurrentPlayer();
         GameObject[] playerPieces = currentPlayer == "white" ? game.playerWhite : game.playerBlack;
 
-        //Scan through all pieces of the current player to find the best defensive move
+        MovePlate bestDefensiveMove = null;
+        int bestDefenseScore = int.MinValue;
+
         foreach (var piece in playerPieces)
         {
             Chessman chessman = piece.GetComponent<Chessman>();
-            chessman.InitiateMovePlates();  //Generate move plates for the current piece
+            chessman.InitiateMovePlates();
 
-            //Check each move plate of the piece
             GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
             foreach (var movePlate in movePlates)
             {
                 MovePlate mpScript = movePlate.GetComponent<MovePlate>();
 
-                //Access the coordinates directly using matrixX and matrixY
-                int matrixX = mpScript.matrixX;
-                int matrixY = mpScript.matrixY;
-
-                //If the move plate is attacking (red), avoid that position
-                if (mpScript.attack)
+                int defenseScore = EvaluateMoveDefense(game, chessman, mpScript);
+                if (defenseScore > bestDefenseScore)
                 {
-                    continue; //Skip this move plate
-                }
-
-                //Check if the move would place the player's king in check
-                if (IsKingInCheckAfterMove(game, chessman, matrixX, matrixY))
-                {
-                    continue; //Skip moves that place the king in check
-                }
-
-                // Check if the move helps protect a piece or defends the king
-                if (IsDefensiveMove(game, chessman, mpScript))
-                {
-                    mpScript.OnMouseUp(); //Perform the defensive move
-                    return;
+                    bestDefenseScore = defenseScore;
+                    bestDefensiveMove = mpScript;
                 }
             }
         }
+
+        if (bestDefensiveMove != null)
+        {
+            bestDefensiveMove.OnMouseUp(); // Execute the best defensive move
+        }
+        else
+        {
+            RandomMove(game); // Fallback to random move
+        }
     }
 
-    private bool IsKingInCheckAfterMove(Game game, Chessman chessman, int targetX, int targetY)
+    private int EvaluateMoveDefense(Game game, Chessman piece, MovePlate move)
     {
-        //Backup the current position of the chess piece
-        int originalX = chessman.GetXBoard();
-        int originalY = chessman.GetYBoard();
+        int score = 0;
 
-        //Simulate the move (move the piece to the target location temporarily)
-        chessman.SetXBoard(targetX);
-        chessman.SetYBoard(targetY);
+        // Check if the move protects a piece
+        if (ProtectsPiece(game, move))
+        {
+            score += 20;
+        }
 
-        //Check if the king is in check
-        bool isInCheck = IsKingInCheck(game, game.GetCurrentPlayer());
+        // Avoid check or block check
+        if (IsKingSafeAfterMove(game, piece, move.matrixX, move.matrixY))
+        {
+            score += 15;
+        }
 
-        //Revert the move
-        chessman.SetXBoard(originalX);
-        chessman.SetYBoard(originalY);
+        // If the move captures an attacking piece, prioritize it
+        if (move.attack)
+        {
+            score += GetPieceValue(move.GetReference().GetComponent<Chessman>().type);
+        }
 
-        return isInCheck;
+        return score;
+    }
+
+    private bool IsKingSafeAfterMove(Game game, Chessman piece, int targetX, int targetY)
+    {
+        int originalX = piece.GetXBoard();
+        int originalY = piece.GetYBoard();
+        piece.SetXBoard(targetX);
+        piece.SetYBoard(targetY);
+
+        bool safe = !IsKingInCheck(game, game.GetCurrentPlayer());
+
+        piece.SetXBoard(originalX);
+        piece.SetYBoard(originalY);
+
+        return safe;
     }
 
     private bool IsKingInCheck(Game game, string player)
     {
-        //Identify the player's king
         string kingName = player == "white" ? "white_king" : "black_king";
         GameObject king = GameObject.Find(kingName);
 
-        //Check if the king is in check by any opponent piece
         foreach (GameObject opponentPiece in game.GetOpponentPieces(player))
         {
             Chessman opponentChessman = opponentPiece.GetComponent<Chessman>();
             if (opponentChessman.CanAttackPosition(king.transform.position))
             {
-                return true; //The king is in check
+                return true;
             }
         }
-        return false; //The king is not in check
-    }
-
-    private bool IsDefensiveMove(Game game, Chessman chessman, MovePlate mpScript)
-    {
-        string currentPlayer = game.GetCurrentPlayer();
-        GameObject opponentKing = currentPlayer == "white" ? GameObject.Find("black_king") : GameObject.Find("white_king");
-
-        //If the move brings a piece close to the opponent's king, it might be a defensive position
-        if (Vector3.Distance(mpScript.transform.position, opponentKing.transform.position) < 2.0f)
-        {
-            return true;
-        }
-        
         return false;
     }
 
+    private bool ProtectsPiece(Game game, MovePlate move)
+    {
+        GameObject[] playerPieces = game.GetCurrentPlayer() == "white" ? game.playerWhite : game.playerBlack;
+        foreach (var piece in playerPieces)
+        {
+            if (Vector3.Distance(move.transform.position, piece.transform.position) < 1.5f)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int GetPieceValue(string pieceType)
+    {
+        switch (pieceType)
+        {
+            case "queen": return 9;
+            case "rook": return 5;
+            case "bishop": return 3;
+            case "knight": return 3;
+            case "pawn": return 1;
+            default: return 0;
+        }
+    }
+
+    private void RandomMove(Game game)
+    {
+        RandomAI randomAI = new RandomAI();
+        randomAI.MakeMove(game);
+    }
 }
-
-
-
