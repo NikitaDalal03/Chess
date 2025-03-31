@@ -29,7 +29,7 @@ public class StrategicAI : IChessAI
 
                 MovePlate mpScript = movePlate.GetComponent<MovePlate>();
 
-                // Evaluate move only if movePlate is valid
+                // Evaluate move for best strategic option
                 int moveScore = EvaluateMove(game, chessman, mpScript, opponentKing);
                 if (moveScore > bestScore)
                 {
@@ -39,14 +39,13 @@ public class StrategicAI : IChessAI
             }
         }
 
-
         if (bestMove != null)
         {
-            bestMove.OnMouseUp(); // Execute the best strategic move
+            bestMove.OnMouseUp(); // Execute the best move
         }
         else
         {
-            RandomMove(game); // Fallback to random move
+            RandomMove(game); // Fallback to random move if no good move is found
         }
     }
 
@@ -54,32 +53,32 @@ public class StrategicAI : IChessAI
     {
         int score = 0;
 
-        // Prioritize attacking opponent's king
+        // Attack opponent's king
         if (move.GetReference() != null && move.GetReference() == opponentKing)
         {
             score += 50;
         }
 
-        // Protect its own pieces if possible
+        // Protect its own pieces
         if (ProtectsPiece(game, move))
         {
             score += 15;
         }
 
         // Capture high-value opponent pieces
-        if (move.attack)
+        if (move.attack && move.GetReference() != null)
         {
             Chessman target = move.GetReference().GetComponent<Chessman>();
             score += GetPieceValue(target.type);
         }
 
-        // Control center squares (increase priority if moving to the center)
+        // Control center squares
         if (IsCenterSquare(move.matrixX, move.matrixY))
         {
             score += 10;
         }
 
-        // Avoid putting the king in danger
+        // Avoid risky moves that endanger the king
         if (IsKingSafeAfterMove(game, piece, move.matrixX, move.matrixY))
         {
             score += 5;
@@ -89,12 +88,6 @@ public class StrategicAI : IChessAI
             score -= 50; // Big penalty for exposing the king
         }
 
-        if (move == null || move.Equals(null))
-        {
-            return -1000; // Invalid move, penalize heavily
-        }
-
-
         return score;
     }
 
@@ -103,7 +96,7 @@ public class StrategicAI : IChessAI
         GameObject[] playerPieces = game.GetCurrentPlayer() == "white" ? game.playerWhite : game.playerBlack;
         foreach (var piece in playerPieces)
         {
-            if (Vector3.Distance(move.transform.position, piece.transform.position) < 1.5f)
+            if (piece != null && Vector3.Distance(move.transform.position, piece.transform.position) < 1.5f)
             {
                 return true;
             }
@@ -126,8 +119,7 @@ public class StrategicAI : IChessAI
 
     private bool IsCenterSquare(int x, int y)
     {
-        // Center squares of the board (higher control priority)
-        return (x == 3 || x == 4) && (y == 3 || y == 4);
+        return (x == 3 || x == 4) && (y == 3 || y == 4); // Center squares for better board control
     }
 
     private bool IsKingSafeAfterMove(Game game, Chessman piece, int targetX, int targetY)
@@ -150,12 +142,23 @@ public class StrategicAI : IChessAI
         string kingName = player == "white" ? "white_king" : "black_king";
         GameObject king = GameObject.Find(kingName);
 
-        foreach (GameObject opponentPiece in game.GetOpponentPieces(player))
+        GameObject[] opponentPieces = game.GetOpponentPieces(player);
+        foreach (GameObject opponentPiece in opponentPieces)
         {
-            Chessman opponentChessman = opponentPiece.GetComponent<Chessman>();
-            if (opponentChessman.CanAttackPosition(king.transform.position))
+            if (opponentPiece != null && opponentPiece.activeSelf)
             {
-                return true;
+                Chessman opponentChessman = opponentPiece.GetComponent<Chessman>();
+                opponentChessman.InitiateMovePlates();
+
+                GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
+                foreach (var movePlate in movePlates)
+                {
+                    MovePlate mpScript = movePlate.GetComponent<MovePlate>();
+                    if (mpScript.GetReference() == king)
+                    {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -168,7 +171,7 @@ public class StrategicAI : IChessAI
 
         foreach (var piece in opponentPieces)
         {
-            if (piece.name.Contains(opponent + "_king"))
+            if (piece != null && piece.name.Contains(opponent + "_king"))
             {
                 return piece;
             }

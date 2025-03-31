@@ -310,45 +310,5 @@ public class Chessman : MonoBehaviour
             mpScript.SetReference(gameObject);
             mpScript.SetCoords(matrixX, matrixY);
         }
-
-
-    public bool CanAttackPosition(Vector3 targetPosition)
-    {
-        // Depending on the type of piece, you will need different logic
-        // Here is a simplified check for a few piece types as an example
-
-        // Calculate the difference in x and y positions
-        int dx = Mathf.Abs(xBoard - (int)targetPosition.x);
-        int dy = Mathf.Abs(yBoard - (int)targetPosition.y);
-
-        //For example, let's assume that the piece is a rook:
-        if (type == "rook")
-        {
-            return dx == 0 || dy == 0; //Rooks can move any number of squares horizontally or vertically
-        }
-        //For a bishop:
-        else if (type == "bishop")
-        {
-            return dx == dy; //Bishops can move diagonally
-        }
-        //For a queen:
-        else if (type == "queen")
-        {
-            return dx == dy || dx == 0 || dy == 0; //Queen can move like both a rook and a bishop
-        }
-        //For a knight:
-        else if (type == "knight")
-        {
-            return (dx == 1 && dy == 2) || (dx == 2 && dy == 1); // Knights move in an L-shape
-        }
-        // For a king:
-        else if (type == "king")
-        {
-            return dx <= 1 && dy <= 1; // King can move one square in any direction
-        }
-        // Add additional cases for other piece types...
-
-        return false;
-    }
 }
 
