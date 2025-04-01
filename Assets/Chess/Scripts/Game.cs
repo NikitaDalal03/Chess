@@ -23,6 +23,7 @@ public class Game : MonoBehaviour
 
     private string winner;
 
+
     public void Start()
     {
         chessPiecePosition();
@@ -42,26 +43,35 @@ public class Game : MonoBehaviour
             case 1:
                 selectedAI = new RandomAI();
                 break;
-            case 2:
-                selectedAI = new DefensiveAI();
-                break;
-            case 3:
-                selectedAI = new StrategicAI();
-                break;
+            //case 2:
+            //    selectedAI = new DefensiveAI();
+            //    break;
+            //case 2:
+            //    selectedAI = new StrategicAI();
+            //    break;
         }
     }
 
-    public GameObject[] GetOpponentPieces(string currentPlayer)
+    // Store positions and pieces together
+    public List<(GameObject piece, Vector2 position)> GetOpponentPieces(string currentPlayer)
     {
-        if (currentPlayer == "white")
+        List<(GameObject, Vector2)> opponentPieces = new List<(GameObject, Vector2)>();
+
+        // Get the player's pieces
+        GameObject[] pieces = (currentPlayer == "white") ? playerBlack : playerWhite;
+
+        foreach (var piece in pieces)
         {
-            return playerBlack; // Opponent's pieces are the black ones if it's white's turn
+            Chessman chessman = piece.GetComponent<Chessman>();
+            int x = chessman.GetXBoard();
+            int y = chessman.GetYBoard();
+
+            // Store both the piece and its current position
+            opponentPieces.Add((piece, new Vector2(x, y)));
         }
-        else
-        {
-            return playerWhite; // Opponent's pieces are the white ones if it's black's turn
-        }
+        return opponentPieces;
     }
+
 
     public void chessPiecePosition()
     {
@@ -78,6 +88,25 @@ public class Game : MonoBehaviour
             Create("black_pawn", 3, 6), Create("black_pawn", 4, 6), Create("black_pawn", 5, 6),
             Create("black_pawn", 6, 6), Create("black_pawn", 7, 6) };
     }
+
+
+    public GameObject GetPiece(string pieceName)
+    {
+        foreach (var piece in playerBlack)
+        {
+            if (piece.name == pieceName)
+                return piece;
+        }
+
+        foreach (var piece in playerWhite)
+        {
+            if (piece.name == pieceName)
+                return piece;
+        }
+
+        return null;
+    }
+
 
     public GameObject Create(string name, int x, int y)
     {
@@ -151,15 +180,16 @@ public class Game : MonoBehaviour
 
     public void NextTurn()
     {
+        // Proceed to next turn
         if (currentPlayer == "white")
         {
             currentPlayer = "black";
-            Timer.instance.StartBlackTimer();  
+            Timer.instance.StartBlackTimer();
         }
         else
         {
             currentPlayer = "white";
-            Timer.instance.StartWhiteTimer();  
+            Timer.instance.StartWhiteTimer();
         }
     }
 

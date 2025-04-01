@@ -310,5 +310,6 @@ public class Chessman : MonoBehaviour
             mpScript.SetReference(gameObject);
             mpScript.SetCoords(matrixX, matrixY);
         }
+
 }
 

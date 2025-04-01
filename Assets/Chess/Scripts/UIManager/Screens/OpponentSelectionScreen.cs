@@ -8,7 +8,7 @@ namespace Yudiz.StarterKit.UI
     public class OpponentSelectionScreen : Screen
     {
         [SerializeField] Button high;
-        [SerializeField] Button medium;
+        //[SerializeField] Button medium;
         [SerializeField] Button low;
         [SerializeField] Button backBtn;
 
@@ -22,7 +22,7 @@ namespace Yudiz.StarterKit.UI
 
             base.Show();
             high.onClick.AddListener(OnHigh);
-            medium.onClick.AddListener(OnMedium);
+            //medium.onClick.AddListener(OnMedium);
             low.onClick.AddListener(OnLow);
             backBtn.onClick.AddListener(OnBack);
         }
@@ -33,11 +33,11 @@ namespace Yudiz.StarterKit.UI
             UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
         }
 
-        public void OnMedium()
-        {
-            game.SelectAI(2);
-            UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
-        }
+        //public void OnMedium()
+        //{
+        //    game.SelectAI(2);
+        //    UIManager.Instance.ShowScreen(ScreenName.PlayScreen);
+        //}
 
         public void OnLow()
         {
@@ -54,7 +54,7 @@ namespace Yudiz.StarterKit.UI
         {
             base.Hide();
             high.onClick.RemoveListener(OnHigh);
-            medium.onClick.RemoveListener(OnMedium);
+            //medium.onClick.RemoveListener(OnMedium);
             low.onClick.RemoveListener(OnLow);
             backBtn.onClick.RemoveListener(OnBack);
         }

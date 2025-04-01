@@ -57,10 +57,10 @@ public class MovePlate : MonoBehaviour
         }
 
         // Set the Chesspiece's original location to be empty
-        controller.GetComponent<Game>().SetPositionEmpty(referenceChessman.GetXBoard(), referenceChessman.GetYBoard());    
+        controller.GetComponent<Game>().SetPositionEmpty(referenceChessman.GetXBoard(), referenceChessman.GetYBoard());
 
         // Move reference chess piece to this position
-        referenceChessman.SetXBoard(matrixX);   
+        referenceChessman.SetXBoard(matrixX);
         referenceChessman.SetYBoard(matrixY);
         referenceChessman.SetCoords();
 
@@ -70,9 +70,10 @@ public class MovePlate : MonoBehaviour
         // Switch Current Player
         controller.GetComponent<Game>().NextTurn();
 
-        // Destroy the move plates including self
+        // Destroy the move plates
         referenceChessman.DestroyMovePlates();
     }
+
 
     public void SetCoords(int x, int y)
     {
