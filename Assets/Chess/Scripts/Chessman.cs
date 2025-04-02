@@ -15,11 +15,9 @@ public class Chessman : MonoBehaviour
     //Position for this Chesspiece on the Board
     private int xBoard = -1;
     private int yBoard = -1;
-
-    //Variable for keeping track of the player it belongs to "black" or "white"    
+ 
     private string player;    
 
-    //References to all the possible Sprites that this Chesspiece could be    
     public Sprite black_queen, black_knight, black_bishop, black_king, black_rook, black_pawn;   
     public Sprite white_queen, white_knight, white_bishop, white_king, white_rook, white_pawn;
 
@@ -36,10 +34,8 @@ public class Chessman : MonoBehaviour
     {        
         controller = GameObject.FindGameObjectWithTag("GameController");
 
-        //Take the instantiated location and adjust transform
         SetCoords();
 
-        //Choose correct sprite based on piece's name
         switch (this.name)
         {
             case "black_queen": this.GetComponent<SpriteRenderer>().sprite = black_queen; player = "black"; break;
@@ -71,7 +67,6 @@ public class Chessman : MonoBehaviour
          x += -2.3f;
          y += -2.3f;
 
-         //Set actual unity values
          this.transform.position = new Vector3(x, y, -1.0f);
     }
 
@@ -99,21 +94,18 @@ public class Chessman : MonoBehaviour
     {    
         if (!game.IsGameOver() && game.GetCurrentPlayer() == player)     
         {
-            //Remove all moveplates relating to previously selected piece
             DestroyMovePlates();    
 
-            //Create new MovePlates
             InitiateMovePlates();
         }
     }
 
     public void DestroyMovePlates()
     {
-        //Destroy old MovePlates
         GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
         for (int i = 0; i < movePlates.Length; i++)
         {
-            Destroy(movePlates[i]); //Be careful with this function "Destroy" it is asynchronous
+            Destroy(movePlates[i]);
         }
     }
 

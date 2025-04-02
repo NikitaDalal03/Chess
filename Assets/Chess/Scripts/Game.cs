@@ -10,7 +10,6 @@ public class Game : MonoBehaviour
     [SerializeField] GameObject chesspiece;
     private IChessAI selectedAI;
 
-    //same objects are going to be in "positions" and "playerBlack"/"playerWhite"
     private GameObject[,] positions = new GameObject[8, 8];
     public GameObject[] playerBlack = new GameObject[16];
     public GameObject[] playerWhite = new GameObject[16];
@@ -52,7 +51,6 @@ public class Game : MonoBehaviour
         }
     }
 
-    // Store positions and pieces together
     public List<(GameObject piece, Vector2 position)> GetOpponentPieces(string currentPlayer)
     {
         List<(GameObject, Vector2)> opponentPieces = new List<(GameObject, Vector2)>();

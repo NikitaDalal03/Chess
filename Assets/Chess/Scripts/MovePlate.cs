@@ -6,7 +6,6 @@ using Yudiz.StarterKit.UI;
 
 public class MovePlate : MonoBehaviour
 {
-    // Some functions will need reference to the controller
     public GameObject controller;
 
     GameObject reference = null;    

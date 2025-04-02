@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RandomAI : IChessAI
 {
-    private GameObject lastMovedPiece;  // To keep track of the last moved piece
+    private GameObject lastMovedPiece;  
 
     public void MakeMove(Game game)
     {
