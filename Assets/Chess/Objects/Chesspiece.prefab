@@ -99,8 +99,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
-  type: 
   movePlate: {fileID: 8177014869940044210, guid: 9a47b5b3cc0664f7996b10c1fbff3761, type: 3}
+  player: 
+  pieceType: 0
   black_queen: {fileID: 21300000, guid: 0274f36f47b2441968adda661bc32b22, type: 3}
   black_knight: {fileID: 21300000, guid: 0e669db74e6254d65af4c784d3445958, type: 3}
   black_bishop: {fileID: 21300000, guid: b74cf56cc057d4173b4c9abcab051319, type: 3}
@@ -113,6 +114,7 @@ MonoBehaviour:
   white_king: {fileID: 21300000, guid: fe29e825a55684e45b8e94ab2f7a230f, type: 3}
   white_rook: {fileID: 21300000, guid: cfa0f06f946b643579d8d77785b19d5f, type: 3}
   white_pawn: {fileID: 21300000, guid: f94a711016e864692a46ffabe818caf5, type: 3}
+  isWhite: 0
 --- !u!61 &1267904602886809752
 BoxCollider2D:
   m_ObjectHideFlags: 0

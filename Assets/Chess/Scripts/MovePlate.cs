@@ -21,6 +21,7 @@ public class MovePlate : MonoBehaviour
 
     public void Start()
     {
+
         if (reference != null)
         {
             referenceChessman = reference.GetComponent<Chessman>();
@@ -36,27 +37,24 @@ public class MovePlate : MonoBehaviour
     public void OnMouseUp()
     {
         controller = GameObject.FindGameObjectWithTag("GameController");
+        Game gameScript = controller.GetComponent<Game>();
 
         // Destroy the victim Chesspiece if attacking
         if (attack)
         {
-            GameObject cp = controller.GetComponent<Game>().GetPosition(matrixX, matrixY);
+            GameObject cp = gameScript.GetPosition(matrixX, matrixY);
 
-            if (cp != null)  // Make sure the piece exists
+            if (cp != null)
             {
-                if (cp.name == "white_king") controller.GetComponent<Game>().Winner("black");
-                if (cp.name == "black_king") controller.GetComponent<Game>().Winner("white");
+                if (cp.name == "white_king") gameScript.Winner("black");
+                if (cp.name == "black_king") gameScript.Winner("white");
 
                 Destroy(cp);
-            }
-            else
-            {
-                Debug.LogWarning("No piece at the target position!");
             }
         }
 
         // Set the Chesspiece's original location to be empty
-        controller.GetComponent<Game>().SetPositionEmpty(referenceChessman.GetXBoard(), referenceChessman.GetYBoard());
+        gameScript.SetPositionEmpty(referenceChessman.GetXBoard(), referenceChessman.GetYBoard());
 
         // Move reference chess piece to this position
         referenceChessman.SetXBoard(matrixX);
@@ -64,14 +62,23 @@ public class MovePlate : MonoBehaviour
         referenceChessman.SetCoords();
 
         // Update the matrix with the new piece position
-        controller.GetComponent<Game>().SetPosition(reference);
+        gameScript.SetPosition(reference);
+
+        // Check if the move resulted in check
+        CheckManager checkManager = controller.GetComponent<CheckManager>();
+        bool whiteInCheck = checkManager.IsKingInCheck(true);
+        bool blackInCheck = checkManager.IsKingInCheck(false);
+
+        // Highlight the king in check
+       // gameScript.HighlightKingInCheck(whiteInCheck, blackInCheck);
 
         // Switch Current Player
-        controller.GetComponent<Game>().NextTurn();
+        gameScript.NextTurn();
 
         // Destroy the move plates
         referenceChessman.DestroyMovePlates();
     }
+
 
 
     public void SetCoords(int x, int y)

@@ -8,6 +8,8 @@ namespace Yudiz.StarterKit.UI
 {
     public class NameScreen : Screen
     {
+        [SerializeField] Game game;
+
         [SerializeField] Button nextBtn;
         [SerializeField] Button backBtn;
 

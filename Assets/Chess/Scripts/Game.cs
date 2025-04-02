@@ -20,7 +20,7 @@ public class Game : MonoBehaviour
     //Game Ending
     private bool gameOver = false;
 
-    private string winner;
+    private string winner;    
 
 
     public void Start()
@@ -151,6 +151,8 @@ public class Game : MonoBehaviour
 
     public void Update()
     {
+
+
         if (gameOver && Input.GetMouseButtonDown(0))
         {
             gameOver = false;
@@ -247,4 +249,5 @@ public class Game : MonoBehaviour
         Timer.instance.ResetWhiteTimer();
         Timer.instance.ResetBlackTimer();
     }
+
 }
