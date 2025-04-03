@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -22,7 +23,6 @@ public class Game : MonoBehaviour
 
     private string winner;    
 
-
     public void Start()
     {
         chessPiecePosition();
@@ -34,6 +34,47 @@ public class Game : MonoBehaviour
             SetPosition(playerWhite[i]);
         }
     }
+
+
+    public Dictionary<GameObject, List<Vector2Int>> pieceMovements = new Dictionary<GameObject, List<Vector2Int>>();
+
+    public void RecordMove(GameObject piece, int x, int y)
+    {
+        //if (piece == null)
+        //{
+        //    throw new NullReferenceException("RecordMove: piece is NULL!");
+        //}
+
+        Chessman chessman = piece.GetComponent<Chessman>();
+        //if (chessman == null)
+        //{
+        //    throw new NullReferenceException("RecordMove: Chessman component not found on piece!");
+        //}
+
+        //if (pieceMovements == null)
+        //{
+        //    throw new NullReferenceException("RecordMove: pieceMovements dictionary is NULL!");
+        //}
+
+        if (!pieceMovements.ContainsKey(piece))
+        {
+            pieceMovements[piece] = new List<Vector2Int>();
+        }
+
+        pieceMovements[piece].Add(new Vector2Int(x, y));
+
+        Debug.Log("Piece Moved: " + chessman.pieceType + " | New Position: (" + x + ", " + y + ")");
+    }
+
+
+    public List<Vector2Int> GetPieceMovementHistory(GameObject piece)
+    {
+        if (pieceMovements.ContainsKey(piece))
+            return pieceMovements[piece];
+
+        return new List<Vector2Int>();
+    }
+
 
     public void SelectAI(int aiLevel)
     {
@@ -49,25 +90,6 @@ public class Game : MonoBehaviour
             //    selectedAI = new StrategicAI();
             //    break;
         }
-    }
-
-    public List<(GameObject piece, Vector2 position)> GetOpponentPieces(string currentPlayer)
-    {
-        List<(GameObject, Vector2)> opponentPieces = new List<(GameObject, Vector2)>();
-
-        // Get the player's pieces
-        GameObject[] pieces = (currentPlayer == "white") ? playerBlack : playerWhite;
-
-        foreach (var piece in pieces)
-        {
-            Chessman chessman = piece.GetComponent<Chessman>();
-            int x = chessman.GetXBoard();
-            int y = chessman.GetYBoard();
-
-            // Store both the piece and its current position
-            opponentPieces.Add((piece, new Vector2(x, y)));
-        }
-        return opponentPieces;
     }
 
 
@@ -151,7 +173,7 @@ public class Game : MonoBehaviour
 
     public void Update()
     {
-
+        
 
         if (gameOver && Input.GetMouseButtonDown(0))
         {
@@ -180,11 +202,11 @@ public class Game : MonoBehaviour
 
     public void NextTurn()
     {
-        // Proceed to next turn
         if (currentPlayer == "white")
         {
             currentPlayer = "black";
             Timer.instance.StartBlackTimer();
+
         }
         else
         {
@@ -192,7 +214,7 @@ public class Game : MonoBehaviour
             Timer.instance.StartWhiteTimer();
         }
     }
-
+    
 
     public void Winner(string playerWinner)
     {
@@ -203,10 +225,12 @@ public class Game : MonoBehaviour
         UIManager.Instance.ShowScreen(ScreenName.GameWinScreen);
     }
 
+
     public string GetWinner()
     {
         return winner;
     }
+
 
     public void ResetGame()
     {
@@ -250,4 +274,22 @@ public class Game : MonoBehaviour
         Timer.instance.ResetBlackTimer();
     }
 
+    public void HighlightKingInCheck(bool whiteInCheck, bool blackInCheck)
+    {
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Chesspiece"))
+        {
+            Chessman piece = obj.GetComponent<Chessman>();
+            if (piece.pieceType == PieceType.King)
+            {
+                if ((piece.player == "white" && whiteInCheck) || (piece.player == "black" && blackInCheck))
+                {
+                    piece.SetCheckHighlight(true);
+                }
+                else
+                {
+                    piece.SetCheckHighlight(false);
+                }
+            }
+        }
+    }
 }

@@ -4,90 +4,97 @@ using UnityEngine;
 
 public class CheckManager : MonoBehaviour
 {
-    private Chessman[,] board;
-    private Vector2Int whiteKingPos;
-    private Vector2Int blackKingPos;
+    private Game gameController;
+    private GameObject lastMovedPiece;
 
-    public void UpdateBoard(Chessman[,] newBoard)
+    void Start()
     {
-        board = newBoard;
-        LocateKings();
+        gameController = FindObjectOfType<Game>();
     }
 
-    private void LocateKings()
+    public void CheckForCheck()
     {
-        Debug.Log("Under LocateKing");
+        if (gameController == null)
+        {
+            Debug.LogError("GameController not found!");
+            return;
+        }
+
+        lastMovedPiece = GetLastMovedPiece();
+        if (lastMovedPiece == null)
+        {
+
+            Debug.LogError("No last moved piece found!");
+            return;
+        }
+
+        List<Vector2Int> attackablePositions = GetAttackRange(lastMovedPiece);
+
+        // Iterate through all board positions to find the king
         for (int x = 0; x < 8; x++)
         {
             for (int y = 0; y < 8; y++)
             {
-                if (board[x, y] != null)
+                GameObject piece = gameController.GetPosition(x, y);
+                if (piece == null) continue;
+
+                string pieceName = piece.name;
+
+                // If the piece is a king and its position is in attackable positions, highlight it
+                if ((pieceName == "white_king" || pieceName == "black_king") &&
+                    attackablePositions.Contains(new Vector2Int(x, y)))
                 {
-                    if (board[x, y].pieceType == PieceType.King)
-                    {
-                        if (board[x, y].player == "white")
-                            whiteKingPos = new Vector2Int(x, y);
-                        else
-                            blackKingPos = new Vector2Int(x, y);
-                    }
+                    HighlightKing(piece);
+                    Debug.Log(pieceName + " is in check!");
                 }
             }
         }
     }
 
-    public bool IsKingInCheck(bool isWhite)
+    private GameObject GetLastMovedPiece()
     {
-        Vector2Int kingPos = isWhite ? whiteKingPos : blackKingPos;
-        bool inCheck = IsSquareUnderAttack(kingPos.x, kingPos.y, !isWhite);
-        Debug.Log("Under IsKingInCheck Condition");
-        HighlightKing(isWhite, inCheck);
-        return inCheck;
-    }
+        Dictionary<GameObject, List<Vector2Int>> pieceMovements = gameController.pieceMovements; 
 
-    public bool IsSquareUnderAttack(int x, int y, bool byWhite)
-    {
-        foreach (var piece in GetAllPieces(byWhite))
+        GameObject lastPiece = null;
+        Vector2Int lastPosition = Vector2Int.zero;
+
+        foreach (var entry in pieceMovements)
         {
-            List<Vector2Int> moves = piece.GetAvailableMoves();
-            foreach (var move in moves)
+            List<Vector2Int> moves = entry.Value;
+            if (moves.Count > 0 && (lastPiece == null || moves[^1] != lastPosition))
             {
-                if (move.x == x && move.y == y)
-                    return true;
+                lastPiece = entry.Key;
+                lastPosition = moves[^1];
             }
         }
-        return false;
+
+        return lastPiece;
     }
 
-    private List<Chessman> GetAllPieces(bool isWhite)
+    private List<Vector2Int> GetAttackRange(GameObject piece)
     {
-        List<Chessman> pieces = new List<Chessman>();
-        for (int x = 0; x < 8; x++)
+        List<Vector2Int> attackPositions = new List<Vector2Int>();
+
+        MovePlate[] movePlates = FindObjectsOfType<MovePlate>();
+
+        foreach (MovePlate movePlate in movePlates)
         {
-            for (int y = 0; y < 8; y++)
+            if (movePlate.GetReference() == piece && movePlate.attack)
             {
-                if (board[x, y] != null && (board[x, y].player == "white") == isWhite)
-                {
-                    pieces.Add(board[x, y]);
-                }
+                attackPositions.Add(new Vector2Int(movePlate.matrixX, movePlate.matrixY));
             }
         }
-        return pieces;
+
+        return attackPositions;
     }
 
-    private void HighlightKing(bool isWhite, bool inCheck)
+    private void HighlightKing(GameObject king)
     {
-        Vector2Int kingPos = isWhite ? whiteKingPos : blackKingPos;
-        Chessman king = board[kingPos.x, kingPos.y];
-
-        if (king != null)
+        Debug.Log("Under Highlight king");
+        SpriteRenderer sr = king.GetComponent<SpriteRenderer>();
+        if (sr != null)
         {
-            king.SetCheckHighlight(inCheck);
+            sr.color = Color.red;
         }
     }
-
-    public Vector2Int GetKingPosition(bool isWhite)
-    {
-        return isWhite ? whiteKingPos : blackKingPos;
-    }
-
 }

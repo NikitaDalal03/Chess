@@ -68,6 +68,7 @@ public class Chessman : MonoBehaviour
          y += -2.3f;
 
          this.transform.position = new Vector3(x, y, -1.0f);
+        //Debug.Log(gameObject.name + " Set Coordinates: (" + GetXBoard() + ", " + GetYBoard() + ")");
     }
 
     public int GetXBoard()
@@ -303,6 +304,13 @@ public class Chessman : MonoBehaviour
          mpScript.SetCoords(matrixX, matrixY);
     }
 
+
+    public List<Vector2Int> GetMoveHistory()
+    {
+        return controller.GetComponent<Game>().GetPieceMovementHistory(gameObject);
+    }
+
+
     public bool isWhite;
     public virtual List<Vector2Int> GetAvailableMoves()
     {
@@ -313,17 +321,13 @@ public class Chessman : MonoBehaviour
     {
         if (inCheck)
         {
-            this.GetComponent<SpriteRenderer>().color = new Color(1.0f, 0.5f, 0.5f, 1.0f); // Light red
+            GetComponent<SpriteRenderer>().color = Color.red;  // Change to a red color if in check
         }
         else
         {
-            this.GetComponent<SpriteRenderer>().color = Color.white;
+            GetComponent<SpriteRenderer>().color = Color.white;  // Reset to default
         }
     }
-
-
-
-
 }
 
 public enum PieceType
